@@ -17,8 +17,8 @@ lemma add_succ (n m k : Nat) : addI (n + 1) m k → ∃ k', k = k' + 1 ∧ addI 
   cases h
   aesop
 
-lemma add_unique : ∀ {n m k k'}, addI n m k → addI n m k' → k = k' := by
-  intro n m k k' h₁ h₂
+lemma add_unique (n m k k': Nat) : addI n m k → addI n m k' → k = k' := by
+  intro h₁ h₂
   induction h₁ generalizing k'
   case zero =>
     cases h₂
@@ -27,6 +27,47 @@ lemma add_unique : ∀ {n m k k'}, addI n m k → addI n m k' → k = k' := by
     cases h₂
     aesop
 
+/-
+  Begin: the version that does not compute
+-/
+lemma add_exists (n m : Nat) : ∃ k, addI n m k := by
+  induction n
+  case zero =>
+    apply Exists.intro m
+    apply addI.zero
+  case succ n h =>
+    obtain ⟨k, h⟩ := h
+    apply Exists.intro (Nat.succ k)
+    apply addI.succ
+    exact h
+
+-- choose is not computable
+noncomputable def addmuffin_bad (n m : Nat) : Nat := by
+  have h := add_exists n m
+  have k := h.choose
+  exact k
+/- End -/
+
+/-
+  Using PSigma for encoding the existential quantifier
+-/
+def add_exists_good (n m : Nat) : Σ' k: Nat, addI n m k := by
+  induction n
+  case zero =>
+    exact PSigma.mk m (addI.zero)
+  case succ n h =>
+    obtain ⟨k, h⟩ := h
+    exact PSigma.mk (Nat.succ k) (addI.succ h)
+
+def addmuffin (n m : Nat) : Nat := by
+  have h := add_exists_good n m
+  exact h.1
+
+#eval addmuffin 2 8
+/- This can be evaluated -/
+
+
+-- Old stuff that are wrong
 def addf (n m : Nat) := ∃ k, addI n m k
 
 instance : Decidable (addf n m) := by
