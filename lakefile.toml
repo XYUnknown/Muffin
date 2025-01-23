@@ -1,0 +1,15 @@
+name = "muffin"
+version = "0.1.0"
+defaultTargets = ["muffin"]
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.15.0-rc1"
+
+[[lean_lib]]
+name = "Muffin"
+
+[[lean_exe]]
+name = "muffin"
+root = "Main"
