@@ -60,18 +60,11 @@ lemma sub_exists (n m : Nat) : m ≤ n → ∃ k : Nat, subI n m k := by
     exact subI.zero
   case succ m h =>
     intro h'
-    cases h'
-    . simp_all
-      obtain ⟨k, h⟩ := h
-      apply Exists.intro (Nat.pred k)
-      exact subI.succ h
-    . rename_i m' h'
-      simp_all
-      have le := le_succ_le m m' h'
-      have h'' := h le
-      obtain ⟨k, h''⟩ := h''
-      apply Exists.intro  (Nat.pred k)
-      exact subI.succ h''
+    have le := le_succ m n h'
+    have h'' := h le
+    have ⟨ k, h''⟩ := h''
+    apply Exists.intro (Nat.pred k)
+    exact subI.succ h''
 -- #print prefix Exists
 -- #print prefix PSigma
 def sub_exists_p (n m : Nat) : m ≤ n → Σ' k : Nat, subI n m k := by
@@ -84,7 +77,6 @@ def sub_exists_p (n m : Nat) : m ≤ n → Σ' k : Nat, subI n m k := by
     have le := le_succ m n h'
     have h'' := h le
     exact ⟨Nat.pred h''.1, subI.succ h''.2⟩
-
 
 lemma add_succ (n m k : Nat) : addI (n + 1) m k → ∃ k', k = k' + 1 ∧ addI n m k' := by
   intro h
