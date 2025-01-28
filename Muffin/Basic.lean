@@ -12,6 +12,80 @@ inductive addI : Nat → Nat → Nat → Prop
   addI n m k →
   addI (Nat.succ n) m (Nat.succ k)
 
+inductive subI : Nat → Nat → Nat → Prop
+| zero : subI n 0 n
+| succ :
+  subI n m k →
+  subI n (Nat.succ m) (Nat.pred k)
+
+lemma sub_unique (n m k k' : Nat) : subI n m k → subI n m k' → k = k' := by
+  intro h₁ h₂
+  induction h₁ generalizing k'
+  case zero =>
+    cases h₂
+    rfl
+  case succ a h =>
+    rename_i m₁ k₁
+    cases h₂
+    rename_i k₂ h₂
+    have h' := h k₂ h₂
+    subst h'
+    simp_all only [Nat.pred_eq_sub_one]
+
+lemma le_succ_le (n m : Nat) : Nat.succ n ≤ m → n ≤ Nat.succ m := by
+  intro h
+  induction m
+  case zero =>
+    aesop
+  case succ m h' =>
+    simp_all
+    have h₁ := Nat.le_step (Nat.le_step h)
+    exact h₁
+
+lemma le_succ (n m : Nat) : Nat.succ n ≤ m → n ≤ m := by
+  intro h
+  induction m
+  case zero =>
+    aesop
+  case succ m h' =>
+    simp_all
+    have h₁ := Nat.le_step h
+    exact h₁
+
+lemma sub_exists (n m : Nat) : m ≤ n → ∃ k : Nat, subI n m k := by
+  induction m
+  case zero =>
+    intro h
+    apply Exists.intro n
+    exact subI.zero
+  case succ m h =>
+    intro h'
+    cases h'
+    . simp_all
+      obtain ⟨k, h⟩ := h
+      apply Exists.intro (Nat.pred k)
+      exact subI.succ h
+    . rename_i m' h'
+      simp_all
+      have le := le_succ_le m m' h'
+      have h'' := h le
+      obtain ⟨k, h''⟩ := h''
+      apply Exists.intro  (Nat.pred k)
+      exact subI.succ h''
+-- #print prefix Exists
+-- #print prefix PSigma
+def sub_exists_p (n m : Nat) : m ≤ n → Σ' k : Nat, subI n m k := by
+  induction m
+  case zero =>
+    intro h
+    exact ⟨n, subI.zero⟩
+  case succ m h =>
+    intro h'
+    have le := le_succ m n h'
+    have h'' := h le
+    exact ⟨Nat.pred h''.1, subI.succ h''.2⟩
+
+
 lemma add_succ (n m k : Nat) : addI (n + 1) m k → ∃ k', k = k' + 1 ∧ addI n m k' := by
   intro h
   cases h
@@ -61,7 +135,10 @@ def add_exists_good (n m : Nat) : Σ' k: Nat, addI n m k := by
 
 def addmuffin (n m : Nat) : Nat := by
   have h := add_exists_good n m
-  exact h.1
+  have ⟨ k, h ⟩ := h
+
+  exact k
+  --exact h.1
 
 #eval addmuffin 2 8
 /- This can be evaluated -/
