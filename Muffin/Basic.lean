@@ -65,6 +65,7 @@ lemma sub_exists (n m : Nat) : m ≤ n → ∃ k : Nat, subI n m k := by
     have ⟨ k, h''⟩ := h''
     apply Exists.intro (Nat.pred k)
     exact subI.succ h''
+
 -- #print prefix Exists
 -- #print prefix PSigma
 def sub_exists_p (n m : Nat) : m ≤ n → Σ' k : Nat, subI n m k := by
